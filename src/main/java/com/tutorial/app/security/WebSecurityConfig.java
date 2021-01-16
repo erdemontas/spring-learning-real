@@ -40,10 +40,27 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         return new AuthTokenFilter();
     }
 
+    //If you dont specify it, passwords will be plain text
+    @Bean
+    public PasswordEncoder passwordEncoder(){
+        return new BCryptPasswordEncoder();
+    }
+
     @Override
     public void configure(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception{
         authenticationManagerBuilder.userDetailsService(userDetailsService)
                 .passwordEncoder(passwordEncoder());
+    }
+
+    @Override
+    public void configure(WebSecurity web) throws Exception {
+        web.ignoring().antMatchers(
+                "/v2/api-docs",
+                "/configuration/ui",
+                "/swagger-resources/**",
+                "/configuration/**",
+                "/swagger-ui.html",
+                "/webjars/**");
     }
 
     @Bean
@@ -52,31 +69,27 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         return super.authenticationManagerBean();
     }
 
-    private boolean isSwaggerRequest(HttpServletRequest httpServletRequest) {
+//    private boolean isSwaggerRequest(HttpServletRequest httpServletRequest) {
+//
+//        List<String> swagger = Arrays.asList("/v1/api-docs",
+//                "/configuration/ui",
+//                "/swagger-resources/**",
+//                "/swagger-resources",
+//                "/configuration/security",
+//                "/swagger-ui.html",
+//                "/v2/api-docs",
+//                "/api/v1/webjars/");
+//        String requestURI = httpServletRequest.getRequestURI();
+//        for (String s : swagger) {
+//            if (requestURI.contains(s)) {
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
 
-        List<String> swagger = Arrays.asList("/v1/api-docs",
-                "/configuration/ui",
-                "/swagger-resources/**",
-                "/swagger-resources",
-                "/configuration/security",
-                "/swagger-ui.html",
-                "/v2/api-docs",
-                "/api/v1/webjars/");
-        String requestURI = httpServletRequest.getRequestURI();
-        for (String s : swagger) {
-            if (requestURI.contains(s)) {
-                return true;
-            }
-        }
-        return false;
-    }
 
 
-    //If you dont specify it, passwords will be plain text
-    @Bean
-    public PasswordEncoder passwordEncoder(){
-        return new BCryptPasswordEncoder();
-    }
 
 //    @Override
 //    protected void configure(HttpSecurity http) throws Exception{
@@ -106,14 +119,4 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 //        http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 //    }
 
-    @Override
-    public void configure(WebSecurity web) {
-        web.ignoring().antMatchers("/v1/api-docs",
-                "/configuration/ui",
-                "**/swagger-resources/**",
-                "/configuration/security",
-                "/swagger-ui.html",
-                "/v2/api-docs",
-                "/webjars/**");
-    }
 }
